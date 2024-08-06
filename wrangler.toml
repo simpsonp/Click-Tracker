@@ -1,0 +1,21 @@
+name = "click-tracker--redirects"
+main = "src/index.js"
+compatibility_date = "2024-07-25"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+ENVIRONMENT = "production"
+
+[[routes]]
+pattern = "api.simpsonpaul.com/v1/redirects/cv*"
+zone_name = "simpsonpaul.com"
+
+# Staging Environment
+[env.staging]
+name = "click-tracker--redirects--staging"
+workers_dev = true
+[env.staging.vars]
+ENVIRONMENT = "staging"
+[[env.staging.routes]]
+pattern = "api.simpsonpaul.com/staging/redirects/cv*"
+zone_name = "simpsonpaul.com"

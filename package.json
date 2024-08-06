@@ -1,0 +1,17 @@
+{
+  "name": "click-tracker-worker-redirects",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy",
+    "dev": "wrangler dev --env staging",
+    "start": "wrangler dev",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.4.5",
+    "wrangler": "^3.60.3",
+    "vitest": "1.5.0"
+  }
+}
