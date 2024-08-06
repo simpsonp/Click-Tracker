@@ -1,0 +1,9 @@
+{
+  "rawPath": "/v1/redirects/cv",
+  "rawQueryString": "v=202208-1&from=a&to=b",
+  "queryStringParameters": {
+    "v": "202208-1",
+    "from": "a",
+    "to": "b"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "rawPath": "/v1/downloads/cv/recommendations/1",
+  "rawQueryString": "r=cv&cvv=202208-1&cvf=linkedin",
+  "queryStringParameters": {
+    "r":"cv",
+    "cvv":"202208-1",
+    "cvf":"linkedin"
+  }
+}

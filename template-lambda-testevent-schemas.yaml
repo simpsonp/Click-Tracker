@@ -1,0 +1,38 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: An AWS SAM template for deployment of test events of SP API Lambda function.
+
+Resources:
+  DefaultSchema:
+    Type: AWS::EventSchemas::Schema
+    Properties:
+      RegistryName: 'lambda-testevent-schemas'
+      SchemaName: _SPApiLambdaFunction-schema
+      Description: 'Test events to manually trigger.'
+      Type: OpenApi3
+      Content: >
+        {
+          "openapi": "3.0.0",
+          "info": {
+            "version": "1.0.0",
+            "title": "Event"
+          },
+          "paths": {},
+          "components": {
+            "schemas": {
+              "Event": {
+                "type": "object"
+              }
+            },
+            "examples": {
+              "requests--status--success": {
+                "value": {
+                  "rawPath": "/status"
+                }
+              },
+              "invalid-payloads--empty": {
+                "value": {}
+              }
+            }
+          }
+        }

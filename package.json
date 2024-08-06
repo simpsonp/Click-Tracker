@@ -1,0 +1,40 @@
+{
+  "name": "click-tracker",
+  "version": "1.0.0",
+  "description": "AWS Lambda function with DynamoDB integration for handling redirects, downloads, and status checks.",
+  "main": "src/index.js",
+  "author": "Simpson P",
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "start": "echo \"No APIs are configured for the Lambda function. You may invoke locally with local test event files using AWS SAM CLI or AWS Toolkit for Visual Studio Code.\" && exit 0",
+    "invoke:status": "sam local invoke -e events/requests/status/success.json",
+    "invoke-remote:status": "sam remote invoke --event-file events/requests/status/success.json",
+    "test": "mocha",
+    "deploy:code": "node scripts/deployFunctionCode.js",
+    "deploy:test-events": "node scripts/deployTestEvents.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.616.0",
+    "@aws-sdk/lib-dynamodb": "^3.616.0"
+  },
+  "devDependencies": {
+    "@aws-sdk/client-lambda": "^3.620.1",
+    "@eslint/eslintrc": "^3.1.0",
+    "chai": "^5.1.1",
+    "dotenv": "^16.4.5",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "globals": "^15.9.0",
+    "mocha": "^10.7.0",
+    "prettier": "^3.3.3",
+    "sinon": "^18.0.0"
+  },
+  "engines": {
+    "node": ">=20 <21"
+  },
+  "private": true
+}

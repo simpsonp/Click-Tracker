@@ -1,0 +1,244 @@
+# https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-specification-template-anatomy.html
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: An AWS Serverless Application Model template for SP API.
+
+Resources:
+  # Lambda Function
+  SPApiLambdaFunction:
+    # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-function.html
+    # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/sam-resource-function.html
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: SPApiLambdaFunction
+      CodeUri: ./src
+      Description: Function for handling API requests implemented in NodeJS.
+      MemorySize: 128
+      # Timeout increased to 60 to match value from lambda-console:blueprint: https-request.
+      Timeout: 60
+      Handler: index.handler
+      Runtime: nodejs20.x
+      Architectures:
+        - x86_64
+      EphemeralStorage:
+        Size: 512
+      Environment:
+        Variables:
+          NODE_ENV: production
+          API_ORIGIN_DOMAIN: api.simpsonpaul.com
+          LOGGER_TABLE_NAME: !Ref SPApiDBTableForErrorLogs
+      EventInvokeConfig:
+        MaximumEventAgeInSeconds: 21600
+        MaximumRetryAttempts: 2
+        Qualifier: !GetAtt SPApiLambdaAlias.Name
+      PackageType: Zip
+      # Policies:
+      #   https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-template-list.html # This is invalid property here.
+      #   - DynamoDBWritePolicy:
+      #       TableName: !Ref SPApiDBTableForErrorLogs
+      Role: !GetAtt SPApiIAMRoleForLambda.Arn # Associate the new role with the function
+      SnapStart:
+        ApplyOn: None
+      Tags:
+        sp: 1
+        sp-api: 1
+      RuntimeManagementConfig:
+        UpdateRuntimeOn: FunctionUpdate # Not using Auto since this project is meant to be low-maintenance without unexpected issues due to auto updates.
+
+  # Lambda Version
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-version.html
+  SPApiLambdaVersion:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref SPApiLambdaFunction
+      Description: Initial
+    DeletionPolicy: Retain
+
+  # Lambda Alias
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-alias.html
+  SPApiLambdaAlias:
+    Type: AWS::Lambda::Alias
+    Properties:
+      Name: Production
+      FunctionName: !Ref SPApiLambdaFunction
+      FunctionVersion: !GetAtt SPApiLambdaVersion.Version
+
+  # Lambda URL of Unpublished Function for Testing
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-url.html
+  SPApiLambdaFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !Ref SPApiLambdaFunction
+      AuthType: NONE
+      Cors:
+        AllowOrigins:
+          - '*'
+        AllowMethods:
+          - 'GET'
+        AllowHeaders:
+          - '*'
+
+  # Lambda Permission
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-permission.html
+  SPApiLambdaPermissionForFunctionUrl:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref SPApiLambdaFunction
+      FunctionUrlAuthType: NONE
+      Action: lambda:InvokeFunctionUrl
+      Principal: '*' # Allow public access for this test URL. Use other methods to restrict access.
+      # Note: Did not find a way to define a custom Statement Id for Lambda Permissions
+
+  # Lambda URL of Alias
+  SPApiLambdaFunctionAliasUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !Ref SPApiLambdaAlias
+      AuthType: AWS_IAM # Must be set to "AWS_IAM" for related Lambda Permission for access from CloudFront.
+      Cors:
+        AllowOrigins:
+          - '*'
+        AllowMethods:
+          - 'GET'
+        AllowHeaders:
+          - '*'
+
+  # Lambda Permission
+  SPApiLambdaPermissionForFunctionAliasUrl:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref SPApiLambdaAlias
+      Action: lambda:InvokeFunctionUrl
+      Principal: cloudfront.amazonaws.com # For this production URL, restrict access to CloudFront only.
+      SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${SPApiCloudFrontDistributionForLambdaOrigin}
+
+  # DynamoDB Table for Lambda function
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html
+  SPApiDBTableForErrorLogs:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: SPApiErrorLogs
+      AttributeDefinitions:
+        - AttributeName: Id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: Id
+          KeyType: HASH
+      ProvisionedThroughput:
+        # See https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/provisioned-capacity-mode.html
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      Tags:
+        - Key: sp
+          Value: 1
+        - Key: sp-api
+          Value: 1
+
+  # IAM Role for Lambda function
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html
+  SPApiIAMRoleForLambda:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: SPApiIAMRoleForLambda
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        # https://docs.aws.amazon.com/aws-managed-policy/latest/reference/policy-list.html
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-template-list.html
+        # - DynamoDBWritePolicy:
+        #     TableName: !Ref SPApiDBTableForErrorLogs
+        - PolicyName: SPApiDynamoDBPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:PutItem
+                  - dynamodb:UpdateItem
+                  - dynamodb:GetItem
+                  - dynamodb:DeleteItem
+                Resource: !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${SPApiDBTableForErrorLogs}
+      Tags:
+        - Key: sp
+          Value: 1
+        - Key: sp-api
+          Value: 1
+
+  # CloudFront Distribution
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudfront-distribution.html
+  SPApiCloudFrontDistributionForLambdaOrigin:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        PriceClass: PriceClass_All
+        HttpVersion: http2
+        IPV6Enabled: true
+        Comment: !Sub ${AWS::StackName} - Distribution for SP API
+        Origins:
+          - DomainName: !Select [2, !Split ['/', !GetAtt SPApiLambdaFunctionAliasUrl.FunctionUrl]] # Remove https:// from URL
+            Id: SPApiLambdaOrigin
+            CustomOriginConfig:
+              HTTPSPort: 443
+              OriginProtocolPolicy: https-only
+            OriginAccessControlId: !GetAtt SPApiCloudFrontOACForLambdaOrigin.Id
+        Enabled: 'true'
+        DefaultCacheBehavior:
+          TargetOriginId: SPApiLambdaOrigin
+          # https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-managed-cache-policies.html
+          CachePolicyId: '4135ea2d-6df8-44a3-9df3-4b5a84be39ad' # 'CachingDisabled' is recommended for Lambda Function URLs
+          ViewerProtocolPolicy: redirect-to-https
+          SmoothStreaming: 'false'
+          Compress: 'true'
+          # https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-managed-origin-request-policies.html
+          OriginRequestPolicyId: '88a5eaf4-2fd4-4709-b370-b4c650ea3fcf' # AllViewerExceptHostHeader is recommended for Lambda Function URLs
+      Tags:
+        - Key: sp
+          Value: 1
+        - Key: sp-api
+          Value: 1
+
+  # CloudFront Origin Access Control
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-cloudfront-originaccesscontrol.html
+  SPApiCloudFrontOACForLambdaOrigin:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig: 
+        Name: SPApiCloudFrontOACForLambdaOrigin
+        Description: CloudFront OAC For SP Api Lambda Origin
+        SigningBehavior: no-override
+        SigningProtocol: sigv4
+        OriginAccessControlOriginType: lambda
+
+Outputs:
+  # The below info are easily available from the CloudFormation's Resources tab, so they are not defined explicitly in Outputs.
+  # Link to view the Lambda function in AWS Console
+  # Link to view the DynamoDB table in AWS Console
+  # Link to view the IAM role in AWS Console
+  # Link to view the CloudFront Distribution in AWS Console
+  # ARNs of the other resources like Lambda Alias, Lambda Version, Lambda Url(s), etc. Also: Lambda Permission(s), Lambda EventInvokeConfig, etc
+  # Note: See the processed template to find other useful values to export.
+
+  SPApiLambdaFunctionUrl:
+    Description: URL of the Lambda function
+    Value: !GetAtt SPApiLambdaFunctionUrl.FunctionUrl
+    Export:
+      Name: SPApiLambdaFunctionUrl
+
+  SPApiLambdaFunctionAliasUrl:
+    Description: URL of the Lambda alias
+    Value: !GetAtt SPApiLambdaFunctionAliasUrl.FunctionUrl
+    Export:
+      Name: SPApiLambdaFunctionAliasUrl
+
+  SPApiCloudFrontDistributionForLambdaOrigin:
+    Description: CloudFront default domain name configured
+    Value: !Sub https://${SPApiCloudFrontDistributionForLambdaOrigin.DomainName}/
+    Export:
+      Name: SPApiCloudFrontDistributionForLambdaOrigin

@@ -1,0 +1,9 @@
+{
+  "rawPath": "/v1/redirects/cv",
+  "rawQueryString": "v=202208-1&from=linkedin&to=github",
+  "queryStringParameters": {
+    "v": "202208-1",
+    "from": "linkedin",
+    "to": "github"
+  }
+}

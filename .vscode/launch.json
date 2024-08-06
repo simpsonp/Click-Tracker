@@ -1,0 +1,67 @@
+{
+  "configurations": [
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
+      "name": "spapi:SPApiLambdaFunction - /status - Successful Request",
+      "invokeTarget": {
+        "target": "template",
+        "templatePath": "${workspaceFolder}/template.yaml",
+        "logicalId": "SPApiLambdaFunction"
+      },
+      "lambda": {
+        "environmentVariables": {
+          "NODE_ENV": "production",
+          "API_ORIGIN_DOMAIN": "api.simpsonpaul.com",
+          "LOGGER_TABLE_NAME": "SPApiErrorLogs"
+        },
+        "payload": {
+          "path": "${workspaceFolder}/events/requests/status/success.json"
+        },
+        "runtime": "nodejs20.x"
+      }
+    },
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
+      "name": "spapi:SPApiLambdaFunction - /redirects - Successful Request",
+      "invokeTarget": {
+        "target": "template",
+        "templatePath": "${workspaceFolder}/template.yaml",
+        "logicalId": "SPApiLambdaFunction"
+      },
+      "lambda": {
+        "environmentVariables": {
+          "NODE_ENV": "production",
+          "API_ORIGIN_DOMAIN": "api.simpsonpaul.com",
+          "LOGGER_TABLE_NAME": "SPApiErrorLogs"
+        },
+        "payload": {
+          "path": "${workspaceFolder}/events/requests/redirects/success.json"
+        },
+        "runtime": "nodejs20.x"
+      }
+    },
+    {
+      "type": "aws-sam",
+      "request": "direct-invoke",
+      "name": "spapi:SPApiLambdaFunction - /redirects - Bad Request",
+      "invokeTarget": {
+        "target": "template",
+        "templatePath": "${workspaceFolder}/template.yaml",
+        "logicalId": "SPApiLambdaFunction"
+      },
+      "lambda": {
+        "environmentVariables": {
+          "NODE_ENV": "production",
+          "API_ORIGIN_DOMAIN": "api.simpsonpaul.com",
+          "LOGGER_TABLE_NAME": "SPApiErrorLogs"
+        },
+        "payload": {
+          "path": "${workspaceFolder}/events/requests/redirects/bad.json"
+        },
+        "runtime": "nodejs20.x"
+      }
+    }
+  ]
+}

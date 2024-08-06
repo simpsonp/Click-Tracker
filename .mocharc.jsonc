@@ -1,0 +1,9 @@
+{
+  "require": "tests/setup.js",
+  "spec": [
+    // "tests/**/*.test.js"
+    // Explicitly specify order to run tests of helper functions before main handler functions.
+    "tests/unit/lib/**/*.test.js",
+    "tests/unit/handlers/**/*.test.js"
+  ]
+}

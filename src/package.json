@@ -1,0 +1,10 @@
+{
+  "//": [
+    "Note: This is a comment.",
+    "The main package.json is located in the project root (parent directory) and handles the overall project dependencies.",
+    "This package.json is only for configuring the Lambda function to treat all .js files as ES Modules."
+  ],
+  "name": "click-tracker",
+  "version": "1.0.0",
+  "type": "module"
+}

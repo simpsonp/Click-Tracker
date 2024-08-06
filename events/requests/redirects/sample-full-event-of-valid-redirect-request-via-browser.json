@@ -1,0 +1,52 @@
+{
+  "version": "2.0",
+  "routeKey": "$default",
+  "rawPath": "/v1/redirects/cv",
+  "rawQueryString": "v=202208-1&from=linkedin&to=github",
+  "headers": {
+    "sec-fetch-mode": "navigate",
+    "x-amzn-tls-version": "TLSv1.3",
+    "sec-fetch-site": "none",
+    "x-forwarded-proto": "https",
+    "accept-language": "en-GB,en;q=0.5",
+    "x-forwarded-port": "443",
+    "x-forwarded-for": "103.101.234.5",
+    "sec-fetch-user": "?1",
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+    "x-amzn-tls-cipher-suite": "TLS_AES_128_GCM_SHA256",
+    "sec-gpc": "1",
+    "sec-ch-ua": "\"Brave\";v=\"123\", \"Not:A-Brand\";v=\"8\", \"Chromium\";v=\"123\"",
+    "x-amzn-trace-id": "Root=1-678d4f9e-3acc1234359d3029499db678",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Linux\"",
+    "host": "redacteddomainprefix.lambda-url.us-east-2.on.aws",
+    "upgrade-insecure-requests": "1",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+    "sec-fetch-dest": "document"
+  },
+  "queryStringParameters": {
+    "v": "202208-1",
+    "from": "linkedin",
+    "to": "github"
+  },
+  "requestContext": {
+    "accountId": "anonymous",
+    "apiId": "redacteddomainprefix",
+    "domainName": "redacteddomainprefix.lambda-url.us-east-2.on.aws",
+    "domainPrefix": "redacteddomainprefix",
+    "http": {
+      "method": "GET",
+      "path": "/v1/redirects/cv",
+      "protocol": "HTTP/1.1",
+      "sourceIp": "103.101.234.5",
+      "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+    },
+    "requestId": "4563c586-adad-4b1d-9b09-ead245c63676",
+    "routeKey": "$default",
+    "stage": "$default",
+    "time": "09/Jul/2024:14:56:30 +0000",
+    "timeEpoch": 1720536990378
+  },
+  "isBase64Encoded": false
+}
